@@ -26,6 +26,7 @@ function init () {
     pixel.push([])
     for(let x=0;x<30;x++){
       pixel[y].push({
+        position: {x:x,y:y},
         type: "fill",
         state: false,
         color: "rgb(200, 0, 0)",
@@ -55,10 +56,10 @@ function placeTail(){
   })
 }
 function adjustTail(x, y) {
-  tail.forEach(e => {
-    e.x = e.x + x;
-    e.y = e.y + y;
-  });
+  for (let i = 0;i<tail.length;i++) {
+    tail[i].x=tail[i].x+x;
+    tail[i].y=tail[i].y+y;
+  }
   placeTail();
 }
 function placeFood(){
@@ -66,7 +67,6 @@ function placeFood(){
   setPixel(food.x, food.y, true); 
 }
 function generateFoodPosition() {
-  console.log("recursive????")
   y = Math.floor(Math.random() * 30);
   x = Math.floor(Math.random() * 30);
   return getPixel(x, y).state ? generateFoodPosition() : {x:x, y:y};
@@ -90,10 +90,22 @@ function move(keyCode){
       setHead(head.x, head.y + 1);
       adjustTail(0,1);
       break;
+    case 84:
+      alert(JSON.stringify(head) + JSON.stringify(tail));
+      console.log(JSON.stringify(getActivePixel()));
     default:
       break;
   }
   refreshCanvas();
+}
+function getActivePixel(){
+  let activePixel = []
+  pixel.forEach((y, yi) => {
+    y.forEach((x,xi)=>{
+      if(x.state)activePixel.push(x);
+    });
+  });
+  return activePixel;
 }
 function setPixel(x, y, state, type = "fill", color = "rgb(200, 0, 0)") {
   if(x < 0 || x > 29 || y < 0 || y > 29) {
@@ -104,6 +116,7 @@ function setPixel(x, y, state, type = "fill", color = "rgb(200, 0, 0)") {
     return;
   }
   pixel[x][y] = {
+    position: {x:x,y:y},
     type: type,
     state: state,
     color: color,
@@ -123,7 +136,6 @@ function refreshCanvas() {
   pixel.forEach((y, yi) => {
     y.forEach((x, xi) => {
       ctx.fillStyle = x.color;
-      ctx.strokeRect((yi * 20), (xi * 20), 20, 20);
       if(x.state){
         ctx.fillRect((yi * 20), (xi * 20), 20, 20);
       } else {
